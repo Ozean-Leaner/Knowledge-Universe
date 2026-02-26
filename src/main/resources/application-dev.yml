@@ -1,9 +1,13 @@
 spring:
   datasource:
-    url:
-    username:
-    password:
-    driver-class-name:
+    url: jdbc:mysql://localhost:3306/test
+    username: root
+    password: ZXL52O1314
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  mail:
+    host: smtp.163.com
+    username: 19382099605@163.com
+    password: QPqRB34rGvpfnKHX
 
 server:
   port: 8080
