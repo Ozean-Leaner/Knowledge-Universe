@@ -8,5 +8,5 @@ spring:
     active: '@environment@'
   mail:
     host: smtp.163.com
-    username: 19382099605@163.com
-    password: QPqRB34rGvpfnKHX
+    username: 
+    password: 
