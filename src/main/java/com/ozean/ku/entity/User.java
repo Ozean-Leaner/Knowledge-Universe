@@ -13,7 +13,7 @@ import org.springframework.data.annotation.Id;
 public class User {
 
     @Id
-    private Integer id;
+    private Integer user_id;
 
     @Length(min = 3, max = 10)
     private String username;

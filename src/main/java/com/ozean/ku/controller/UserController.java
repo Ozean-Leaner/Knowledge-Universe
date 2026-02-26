@@ -28,20 +28,6 @@ public class UserController {
         this.userservice = userservice;
     }
 
-    @PostMapping("/register")
-    public Result registerUser(HttpServletRequest request, @Valid @RequestBody User user) {
-        MDC.put("IP",request.getRemoteAddr());
-        log.info("user signed up");
-        return new Result();
-    }
-
-    @PostMapping("/login")
-    public Result login(HttpServletRequest request, @Valid @RequestBody User user) {
-        MDC.put("IP",request.getRemoteAddr());
-        log.info("user login");
-        return new Result();
-    }
-
     @GetMapping("/user/find")
     public Result findUserByName(HttpServletRequest request,String name){
         MDC.put("IP",request.getRemoteAddr());

@@ -1,28 +1,20 @@
 package com.ozean.ku.service;
 
-import com.ozean.ku.entity.User;
-import com.ozean.ku.mapper.UserMapper;
-import jakarta.annotation.Resource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthorizeService implements UserDetailsService {
+public interface AuthorizeService extends UserDetailsService {
 
-    @Resource
-    private UserMapper userMapper;
+    UserDetails loadUserByUsername(String username);
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userMapper.findUserByName(username);
-        if (user == null)
-            throw new UsernameNotFoundException("用户名或密码错误");
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(user.getPassword())
-                .roles("USER")
-                .build();
-    }
+    void sendVerifyCode(String email);
+
+    void register(String username, String password, String verificationCode, String email, Integer gender);
+
+    void loginByUsername(String username, String password);
+
+    void loginByEmail(String email, String password);
+
 }
