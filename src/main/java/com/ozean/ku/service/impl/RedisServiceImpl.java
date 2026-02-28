@@ -2,9 +2,11 @@ package com.ozean.ku.service.impl;
 
 import com.ozean.ku.service.RedisService;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
+@Service
 public class RedisServiceImpl implements RedisService {
 
     private final RedisTemplate<String, Object> redisTemplate;

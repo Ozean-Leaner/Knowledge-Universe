@@ -4,9 +4,11 @@ import com.ozean.ku.entity.User;
 import com.ozean.ku.exception.UserException;
 import com.ozean.ku.mapper.UserMapper;
 import com.ozean.ku.service.UserService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;

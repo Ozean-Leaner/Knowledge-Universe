@@ -1,10 +1,7 @@
 package com.ozean.ku.service;
 
-import org.springframework.stereotype.Service;
-
 import java.util.concurrent.TimeUnit;
 
-@Service
 public interface RedisService {
     void set(String key, String value);
 

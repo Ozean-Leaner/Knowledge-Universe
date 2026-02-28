@@ -1,12 +1,4 @@
 spring:
-  datasource:
-    url:
-    username:
-    password:
-    driver-class-name:
   profiles:
     active: '@environment@'
-  mail:
-    host: smtp.163.com
-    username: 
-    password: 
+

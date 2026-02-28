@@ -13,10 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
-import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
-import javax.sql.DataSource;
 import java.io.IOException;
 
 @Configuration
@@ -25,8 +22,7 @@ import java.io.IOException;
 public class SecurityConfiguration {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http,
-                                           PersistentTokenRepository tokenRepository) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(conf -> conf
                         .requestMatchers("/auth/**").permitAll()
@@ -46,18 +42,8 @@ public class SecurityConfiguration {
                         .logoutSuccessHandler(this::onLogoutSuccess)
                 )
                 .csrf(AbstractHttpConfigurer::disable)
-                .rememberMe(conf -> conf.tokenRepository(tokenRepository))
                 .build();
     }
-
-    @Bean
-    public PersistentTokenRepository tokenRepository(DataSource dataSource) {
-        JdbcTokenRepositoryImpl tokenRepository = new JdbcTokenRepositoryImpl();
-        tokenRepository.setCreateTableOnStartup(true);
-//        tokenRepository.setDataSource(dataSource);
-        return tokenRepository;
-    }
-
 
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,

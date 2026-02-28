@@ -4,9 +4,11 @@ import com.ozean.ku.entity.Category;
 import com.ozean.ku.exception.CategoryException;
 import com.ozean.ku.mapper.CategoryMapper;
 import com.ozean.ku.service.CategoryService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryMapper categoryMapper;

@@ -2,7 +2,6 @@ package com.ozean.ku.service.impl;
 
 import com.ozean.ku.entity.User;
 import com.ozean.ku.exception.AuthorizeException;
-import com.ozean.ku.exception.UserException;
 import com.ozean.ku.mapper.UserMapper;
 import com.ozean.ku.service.AuthorizeService;
 import com.ozean.ku.service.RedisService;
@@ -10,9 +9,11 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
+@Service
 public class AuthorizeServiceImpl implements AuthorizeService {
     private final UserMapper userMapper;
     private final RedisService redisService;
@@ -51,7 +52,7 @@ public class AuthorizeServiceImpl implements AuthorizeService {
         redisService.set(key, code, VERIFY_CODE_EXPIRE_MINUTES, TimeUnit.MINUTES);
 
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-        simpleMailMessage.setFrom("");
+        simpleMailMessage.setFrom("KnowledgeUniverse@163.com");
         simpleMailMessage.setTo(email);
         simpleMailMessage.setSubject("【KU】注册验证码");
         simpleMailMessage.setText("您的注册验证码是："+code+"，30分钟内有效。");
