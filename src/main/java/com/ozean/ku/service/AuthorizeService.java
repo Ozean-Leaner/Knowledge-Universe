@@ -11,8 +11,6 @@ public interface AuthorizeService extends UserDetailsService {
 
     void register(String username, String password, String verificationCode, String email, Integer gender);
 
-    void loginByUsername(String username, String password);
-
-    void loginByEmail(String email, String password);
+    String login(String loginID, String password);
 
 }

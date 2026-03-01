@@ -34,4 +34,6 @@ public class User {
     private Integer post_id;
 
     private Integer comment_id;
+
+    private String role;
 }

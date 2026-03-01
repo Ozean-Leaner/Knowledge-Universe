@@ -4,14 +4,11 @@ import com.ozean.ku.entity.Result;
 import com.ozean.ku.entity.User;
 import com.ozean.ku.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -29,19 +26,19 @@ public class UserController {
     }
 
     @GetMapping("/user/find")
-    public Result findUserByName(HttpServletRequest request,String name){
+    public Result<User> findUserByName(HttpServletRequest request,String name){
         MDC.put("IP",request.getRemoteAddr());
         User user = userservice.findUserByName(name);
         log.info("user found by username");
-        return new  Result();
+        return Result.success(user);
     }
 
     @GetMapping("/users")
     @PreAuthorize("hasRole('admin')")
-    public Result findAllUsers(HttpServletRequest request){
+    public Result<List<User>> findAllUsers(HttpServletRequest request){
         MDC.put("IP",request.getRemoteAddr());
-        List<User> user = userservice.findAllUser();
+        List<User> users = userservice.findAllUser();
         log.info("user find");
-        return new Result();
+        return Result.success(users);
     }
 }

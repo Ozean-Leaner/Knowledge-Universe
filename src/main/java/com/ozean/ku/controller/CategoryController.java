@@ -21,11 +21,11 @@ public class CategoryController {
     }
 
     @GetMapping("/home")
-    public Result getCategories(HttpServletRequest request) {
+    public Result<List<Category>> getCategories(HttpServletRequest request) {
         MDC.put("IP",request.getRemoteAddr());
         List<Category> categories = categoryService.getCategories();
         log.info("categories got");
-        return new Result();
+        return Result.success(categories);
     }
 
 
