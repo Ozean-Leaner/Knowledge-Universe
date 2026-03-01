@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url:
+    username:
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  mail:
+    host:
+    username:
+    password:
+  data:
+    redis:
+      host:
+      port:
+      database:
+  web:
+    resources:
+      static-locations:
+server:
+  port:
+  servlet:
+    session:
+      timeout:
