@@ -28,7 +28,7 @@ public class UserController {
     @GetMapping("/user/find")
     public Result<User> findUserByName(HttpServletRequest request,String name){
         MDC.put("IP",request.getRemoteAddr());
-        User user = userservice.findUserByName(name);
+        User user = userservice.findUserAllByName(name);
         log.info("user found by username");
         return Result.success(user);
     }

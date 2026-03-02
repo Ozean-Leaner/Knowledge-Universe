@@ -7,16 +7,15 @@ import com.ozean.ku.service.AuthorizeService;
 import com.ozean.ku.service.RedisService;
 import com.ozean.ku.utills.JwtUtils;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.ibatis.exceptions.TooManyResultsException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -61,20 +60,21 @@ public class AuthorizeServiceImpl implements AuthorizeService {
 
     @Override
     public UserDetails loadUserByUsername(String loginID) throws UsernameNotFoundException {
-        User user = isEmail(loginID) ? userMapper.findUserByEmail(loginID) : userMapper.findUserByName(loginID);
+        User user = isEmail(loginID) ? userMapper.findUserAllByEmail(loginID) : userMapper.findUserAllByName(loginID);
         if (user == null)
             throw new UsernameNotFoundException("用户名或密码错误");
+
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())
                 .password(user.getPassword())
-                .roles("USER")
+                .roles(String.valueOf(user.getRole()))
                 .build();
     }
 
     @Override
     public void sendVerifyCode(String email) {
 
-        if (userMapper.findUserByEmail(email) != null){
+        if (userMapper.findUserAllByEmail(email) != null){
             throw new AuthorizeException("该邮箱已被注册！");
         }
 
@@ -108,6 +108,11 @@ public class AuthorizeServiceImpl implements AuthorizeService {
 
         String encryptedPwd = passwordEncoder.encode(password);
 
+        if (userMapper.findUserAllByName(username) != null)
+            throw new AuthorizeException("用户名已存在！");
+        else if (userMapper.findUserAllByEmail(email) != null)
+            throw new AuthorizeException("该邮箱已注册！");
+
         userMapper.addUser(username, encryptedPwd, email, gender);
 
         redisService.delete(key);
@@ -121,7 +126,13 @@ public class AuthorizeServiceImpl implements AuthorizeService {
             UserDetails userDetails = Objects.requireNonNull((UserDetails) authentication.getPrincipal(), "请输入用户名或密码！");
             return jwtUtils.createJwt(userDetails);
         } catch (Exception e) {
-            throw new AuthorizeException("未知错误："+e.getMessage());
+            e.printStackTrace();
+            if (e instanceof AuthenticationException) {
+                throw new AuthorizeException("用户名或密码错误！");
+            } else if (e.getCause() instanceof TooManyResultsException) {
+                throw new AuthorizeException("系统错误：存在重复的用户数据，请联系管理员！");
+            } else
+            throw new AuthorizeException("未知错误："+ e.getMessage());
         }
     }
 }

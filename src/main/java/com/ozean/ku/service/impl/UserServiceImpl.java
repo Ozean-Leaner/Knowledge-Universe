@@ -18,8 +18,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findUserByName(String username) {
-        User user = userMapper.findUserByName(username);
+    public User findUserAllByName(String username) {
+        User user = userMapper.findUserAllByName(username);
         if (user == null) {
             throw new UserException("User not found");
         }

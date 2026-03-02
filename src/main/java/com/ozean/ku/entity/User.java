@@ -1,5 +1,6 @@
 package com.ozean.ku.entity;
 
+import com.ozean.ku.enums.RoleEnum;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,5 +36,5 @@ public class User {
 
     private Integer comment_id;
 
-    private String role;
+    private RoleEnum role;
 }

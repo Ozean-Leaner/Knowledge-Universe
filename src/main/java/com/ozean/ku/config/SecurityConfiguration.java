@@ -9,9 +9,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.Nullable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -27,7 +24,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Properties;
 
 @Configuration
 @EnableWebSecurity
@@ -71,18 +67,6 @@ public class SecurityConfiguration {
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter(jwtUtils);
     }
-
-//    public void onAuthenticationSuccess(HttpServletRequest request,
-//                                        HttpServletResponse response,
-//                                        Authentication authentication) throws IOException, ServletException {
-//        response.getWriter().write("login successfully");
-//    }
-//
-//    public void onAuthenticationFailure(HttpServletRequest request,
-//                                        HttpServletResponse response,
-//                                        AuthenticationException exception) throws IOException, ServletException {
-//        response.getWriter().write("login failed");
-//    }
 
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, @Nullable Authentication authentication) throws IOException, ServletException {
         response.setContentType("application/json;charset=utf-8");
