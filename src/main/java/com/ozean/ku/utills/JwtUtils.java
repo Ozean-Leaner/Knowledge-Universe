@@ -18,12 +18,12 @@ import java.util.*;
 public class JwtUtils {
 
     @Value("${jwt.secret-key}")
-    private static String key;
+    private String key;
 
     @Value("${jwt.expire-seconds}")
-    private static int expireSeconds;
+    private int expireSeconds;
 
-    public static String createJwt(UserDetails user) {
+    public String createJwt(UserDetails user) {
         Algorithm algorithm = Algorithm.HMAC256(key);
         Calendar calendar = Calendar.getInstance();
         Date now  = calendar.getTime();
@@ -37,7 +37,7 @@ public class JwtUtils {
                 .sign(algorithm);
     }
 
-    public static UserDetails resolveJwt(String token) {
+    public UserDetails resolveJwt(String token) {
         Algorithm algorithm = Algorithm.HMAC256(key);
         JWTVerifier verifier = JWT.require(algorithm).build();
         try {
@@ -63,7 +63,7 @@ public class JwtUtils {
 
     private static final HashSet<String> blackList = new HashSet<>();
 
-    public static boolean invalidate(String token) {
+    public boolean invalidate(String token) {
         Algorithm algorithm = Algorithm.HMAC256(key);
         JWTVerifier verifier = JWT.require(algorithm).build();
         try {

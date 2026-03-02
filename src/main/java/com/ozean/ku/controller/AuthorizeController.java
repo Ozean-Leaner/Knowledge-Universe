@@ -12,18 +12,22 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Objects;
 
 @Slf4j
 @RestController
+@RequestMapping("/auth")
 public class AuthorizeController {
 
     private final AuthorizeService authorizeService;
+    private final JwtUtils jwtUtils;
 
-    public AuthorizeController(AuthorizeService authorizeService) {
+    public AuthorizeController(AuthorizeService authorizeService, JwtUtils jwtUtils) {
         this.authorizeService = authorizeService;
+        this.jwtUtils = jwtUtils;
     }
 
     @GetMapping("/sendVerifyCode")
@@ -55,7 +59,7 @@ public class AuthorizeController {
     public Result<String> refreshToken() {
         User user = (User) Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getPrincipal();
         if (user != null) {
-            String jwt = JwtUtils.createJwt((UserDetails) user);
+            String jwt = jwtUtils.createJwt((UserDetails) user);
             return Result.success(jwt);
         }
         throw new AuthorizeException("未知错误");

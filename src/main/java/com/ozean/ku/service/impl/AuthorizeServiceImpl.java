@@ -6,8 +6,13 @@ import com.ozean.ku.mapper.UserMapper;
 import com.ozean.ku.service.AuthorizeService;
 import com.ozean.ku.service.RedisService;
 import com.ozean.ku.utills.JwtUtils;
+import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -28,24 +33,29 @@ public class AuthorizeServiceImpl implements AuthorizeService {
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
     private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
 
+    @Resource
+    private Environment environment;
+
     private final UserMapper userMapper;
     private final RedisService redisService;
     private final JavaMailSender javaMailSender;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
+    private final ApplicationContext applicationContext;
+    private final JwtUtils jwtUtils;
 
-    public AuthorizeServiceImpl(UserMapper userMapper, RedisService redisService, JavaMailSender javaMailSender, PasswordEncoder passwordEncoder, AuthenticationManagerBuilder authenticationManagerBuilder, AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
+    public AuthorizeServiceImpl(UserMapper userMapper, RedisService redisService, JavaMailSender javaMailSender, PasswordEncoder passwordEncoder, ApplicationContext applicationContext, JwtUtils jwtUtils) {
         this.userMapper = userMapper;
         this.redisService = redisService;
         this.javaMailSender = javaMailSender;
         this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
+        this.applicationContext = applicationContext;
+        this.jwtUtils = jwtUtils;
     }
 
     private static final String VERIFY_CODE_KEY_PREFIX = "verify_code:email:";
     private static final long VERIFY_CODE_EXPIRE_MINUTES = 30;
 
-    private static boolean isEmail(String loginID){
+    private boolean isEmail(String loginID){
         return EMAIL_PATTERN.matcher(loginID).matches();
     }
 
@@ -57,12 +67,13 @@ public class AuthorizeServiceImpl implements AuthorizeService {
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())
                 .password(user.getPassword())
-                .roles(user.getRole())
+                .roles("USER")
                 .build();
     }
 
     @Override
     public void sendVerifyCode(String email) {
+
         if (userMapper.findUserByEmail(email) != null){
             throw new AuthorizeException("该邮箱已被注册！");
         }
@@ -74,13 +85,13 @@ public class AuthorizeServiceImpl implements AuthorizeService {
 
         try {
             SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-            simpleMailMessage.setFrom("KnowledgeUniverse@163.com");
+            simpleMailMessage.setFrom("Knowledgeuniverse@163.com");
             simpleMailMessage.setTo(email);
             simpleMailMessage.setSubject("【KU】注册验证码");
             simpleMailMessage.setText("您的注册验证码是："+code+"，30分钟内有效。");
             javaMailSender.send(simpleMailMessage);
-        } catch (AuthorizeException e) {
-            throw new AuthorizeException("未知错误");
+        } catch (Exception e) {
+            throw new AuthorizeException("未知错误：" + e.getMessage());
         }
     }
 
@@ -105,11 +116,12 @@ public class AuthorizeServiceImpl implements AuthorizeService {
     @Override
     public String login(String loginID, String password) {
         try {
+            AuthenticationManager authenticationManager = applicationContext.getBean(AuthenticationManager.class);
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginID, password));
             UserDetails userDetails = Objects.requireNonNull((UserDetails) authentication.getPrincipal(), "请输入用户名或密码！");
-            return JwtUtils.createJwt(userDetails);
+            return jwtUtils.createJwt(userDetails);
         } catch (Exception e) {
-            throw new AuthorizeException("用户名或密码错误！");
+            throw new AuthorizeException("未知错误："+e.getMessage());
         }
     }
 }

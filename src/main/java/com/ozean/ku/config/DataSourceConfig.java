@@ -52,15 +52,19 @@ public class DataSourceConfig {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
         mailSender.setHost(env.getProperty("spring.mail.host"));
-        mailSender.setPort(587);
+        mailSender.setPort(465);
         mailSender.setUsername(env.getProperty("spring.mail.username"));
         mailSender.setPassword(env.getProperty("spring.mail.password"));
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.ssl.enable", "true");
+        props.put("mail.smtp.ssl.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.debug", "false");
+        props.put("mail.smtp.ssl.socketFactory.fallback", "false");
+        props.put("mail.smtp.ssl.socketFactory.port", "465");
+        props.put("mail.smtp.starttls.enable", "false");
+        props.put("mail.debug", "true");
 
         return mailSender;
     }
