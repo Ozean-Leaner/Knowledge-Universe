@@ -12,7 +12,6 @@ import org.springframework.data.annotation.Id;
 @AllArgsConstructor
 @Data
 public class User {
-
     @Id
     private Integer user_id;
 
@@ -35,6 +34,12 @@ public class User {
     private Integer post_id;
 
     private Integer comment_id;
+
+    private String createTime;
+
+    private String updateTime;
+
+    private String lastLoginTime;
 
     private RoleEnum role;
 }

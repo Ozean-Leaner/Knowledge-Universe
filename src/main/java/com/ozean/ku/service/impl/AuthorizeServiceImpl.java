@@ -60,7 +60,7 @@ public class AuthorizeServiceImpl implements AuthorizeService {
 
     @Override
     public UserDetails loadUserByUsername(String loginID) throws UsernameNotFoundException {
-        User user = isEmail(loginID) ? userMapper.findUserAllByEmail(loginID) : userMapper.findUserAllByName(loginID);
+        User user = isEmail(loginID) ? userMapper.getUserAllInfoByEmail(loginID) : userMapper.getUserAllInfoByName(loginID);
         if (user == null)
             throw new UsernameNotFoundException("用户名或密码错误");
 
@@ -74,7 +74,7 @@ public class AuthorizeServiceImpl implements AuthorizeService {
     @Override
     public void sendVerifyCode(String email) {
 
-        if (userMapper.findUserAllByEmail(email) != null){
+        if (userMapper.getUserAllInfoByEmail(email) != null){
             throw new AuthorizeException("该邮箱已被注册！");
         }
 
@@ -108,9 +108,9 @@ public class AuthorizeServiceImpl implements AuthorizeService {
 
         String encryptedPwd = passwordEncoder.encode(password);
 
-        if (userMapper.findUserAllByName(username) != null)
+        if (userMapper.getUserAllInfoByName(username) != null)
             throw new AuthorizeException("用户名已存在！");
-        else if (userMapper.findUserAllByEmail(email) != null)
+        else if (userMapper.getUserAllInfoByEmail(email) != null)
             throw new AuthorizeException("该邮箱已注册！");
 
         userMapper.addUser(username, encryptedPwd, email, gender);
