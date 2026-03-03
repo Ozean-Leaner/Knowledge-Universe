@@ -63,6 +63,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserSimpleVO getUserSimpleInfo(String id) {
+        UserSimpleVO userSimpleVO = userMapper.getUserSimpleInfo(id);
+        if (userSimpleVO == null)
+            throw new UserException("User not found");
+        return userSimpleVO;
+    }
+
+    @Override
+    public User updateUserById(String id, String username, String email, Integer gender, String desc, String avatar) {
+        return userMapper.updateUserById(id, username, email, gender, desc, avatar);
+    }
+
+
+    @Override
     public List<User> listAllUsers() {
         List<User> users = userMapper.listAllUsers();
         if (users == null) {

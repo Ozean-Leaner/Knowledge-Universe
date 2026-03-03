@@ -97,33 +97,27 @@ public class AuthorizeServiceImpl implements AuthorizeService {
 
     @Override
     public void register(String username, String password, String verificationCode, String email, Integer gender) {
-        String key = VERIFY_CODE_KEY_PREFIX + email;
-        String redisCode = (String) redisService.get(key);
-        if (redisCode == null) {
-            throw new AuthorizeException("验证码已过期！");
+        if(verifyCode(email, verificationCode)) {
+
+            String encryptedPwd = passwordEncoder.encode(password);
+
+            if (userMapper.getUserAllInfoByName(username) != null)
+                throw new AuthorizeException("用户名已存在！");
+            else if (userMapper.getUserAllInfoByEmail(email) != null)
+                throw new AuthorizeException("该邮箱已注册！");
+
+            userMapper.addUser(username, encryptedPwd, email, gender);
         }
-        if (!redisCode.equals(verificationCode)) {
-            throw new AuthorizeException("验证码错误！");
-        }
-
-        String encryptedPwd = passwordEncoder.encode(password);
-
-        if (userMapper.getUserAllInfoByName(username) != null)
-            throw new AuthorizeException("用户名已存在！");
-        else if (userMapper.getUserAllInfoByEmail(email) != null)
-            throw new AuthorizeException("该邮箱已注册！");
-
-        userMapper.addUser(username, encryptedPwd, email, gender);
-
-        redisService.delete(key);
     }
 
     @Override
     public String login(String loginID, String password) {
         try {
+            User user = isEmail(loginID) ? userMapper.getUserAllInfoByEmail(loginID) : userMapper.getUserAllInfoByName(loginID);
             AuthenticationManager authenticationManager = applicationContext.getBean(AuthenticationManager.class);
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginID, password));
             UserDetails userDetails = Objects.requireNonNull((UserDetails) authentication.getPrincipal(), "请输入用户名或密码！");
+            userMapper.updateUserLoginTime(String.valueOf(user.getUser_id()));
             return jwtUtils.createJwt(userDetails);
         } catch (Exception e) {
             e.printStackTrace();
@@ -134,5 +128,26 @@ public class AuthorizeServiceImpl implements AuthorizeService {
             } else
             throw new AuthorizeException("未知错误："+ e.getMessage());
         }
+    }
+
+    @Override
+    public void updateUserPwdById(String id, String password, String email, String verificationCode) {
+        sendVerifyCode(email);
+        if (verifyCode(email, verificationCode)) {
+            userMapper.updateUserPwdById(id, passwordEncoder.encode(password));
+        }
+    }
+
+    private boolean verifyCode(String email, String verificationCode) {
+        String key = VERIFY_CODE_KEY_PREFIX + email;
+        String redisCode = (String) redisService.get(key);
+        if (redisCode == null) {
+            throw new AuthorizeException("验证码已过期！");
+        }
+        if (!redisCode.equals(verificationCode)) {
+            throw new AuthorizeException("验证码错误！");
+        }
+        redisService.delete(key);
+        return true;
     }
 }

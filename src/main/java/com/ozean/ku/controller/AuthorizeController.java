@@ -8,12 +8,10 @@ import com.ozean.ku.utills.JwtUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
@@ -63,5 +61,14 @@ public class AuthorizeController {
             return Result.success(jwt);
         }
         throw new AuthorizeException("未知错误");
+    }
+
+    @PutMapping("/user/info/update/pwd/{id}")
+    @PreAuthorize("hasAnyRole('USER','ADMIN','SUPER_ADMIN')")
+    public Result<String> updateUserPwdById(HttpServletRequest request, @PathVariable String id, String password, String email, String verificationCode) {
+        MDC.put("IP",request.getRemoteAddr());
+        authorizeService.updateUserPwdById(id, password, email, verificationCode);
+        log.info("user update pwd by id");
+        return Result.success(null);
     }
 }

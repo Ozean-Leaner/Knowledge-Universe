@@ -19,4 +19,9 @@ public interface UserService {
     List<UserSimpleVO> searchUserSimplePage(String name);
 
     UserDetailVO getUserDetailInfo(String id);
+
+    UserSimpleVO getUserSimpleInfo(String id);
+
+    User updateUserById(String id, String username, String email, Integer gender, String desc, String avatar);
+
 }
