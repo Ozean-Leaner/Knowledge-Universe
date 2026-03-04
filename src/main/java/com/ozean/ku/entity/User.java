@@ -13,7 +13,7 @@ import org.springframework.data.annotation.Id;
 @Data
 public class User {
     @Id
-    private Integer user_id;
+    private Long userId;
 
     @Length(min = 3, max = 10)
     private String username;
@@ -31,9 +31,9 @@ public class User {
 
     private String avatarUrl;
 
-    private Integer post_id;
+    private Long post_id;
 
-    private Integer comment_id;
+    private Long comment_id;
 
     private String createTime;
 

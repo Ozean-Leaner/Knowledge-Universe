@@ -27,7 +27,7 @@ public class UserController {
         this.userservice = userservice;
     }
 
-    @GetMapping("/info/all/{name}")
+    @GetMapping("/info/all/by-name/{name}")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     public Result<User> getUserAllInfoByName(HttpServletRequest request, @PathVariable String name) {
         MDC.put("IP",request.getRemoteAddr());
@@ -36,7 +36,7 @@ public class UserController {
         return Result.success(user);
     }
 
-    @GetMapping("/info/all/{email}")
+    @GetMapping("/info/all/by-email/{email}")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     public Result<User> getUserAllInfoByEmail(HttpServletRequest request, @PathVariable String email) {
         MDC.put("IP",request.getRemoteAddr());
@@ -47,7 +47,7 @@ public class UserController {
 
     @GetMapping("/info/all/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
-    public Result<User> getUserAllInfoById(HttpServletRequest request, @PathVariable Integer id) {
+    public Result<User> getUserAllInfoById(HttpServletRequest request, @PathVariable Long id) {
         MDC.put("IP",request.getRemoteAddr());
         User user = userservice.getUserAllInfoById(id);
         log.info("user all info found by id");
@@ -63,7 +63,7 @@ public class UserController {
         return Result.success(users);
     }
 
-    @GetMapping("/info/simple/{name}")
+    @GetMapping("/info/simple/by-name/{name}")
     @PreAuthorize("hasAnyRole('USER','ADMIN','SUPER_ADMIN')")
     public Result<List<UserSimpleVO>> searchUserSimplePage(HttpServletRequest request, @PathVariable String name){
         MDC.put("IP",request.getRemoteAddr());
@@ -74,16 +74,16 @@ public class UserController {
 
     @GetMapping("/info/detail/{id}")
     @PreAuthorize("hasAnyRole('USER','ADMIN','SUPER_ADMIN')")
-    public Result<UserDetailVO> getUserDetailInfo(HttpServletRequest request, @PathVariable String id){
+    public Result<UserDetailVO> getUserDetailInfo(HttpServletRequest request, @PathVariable Long id){
         MDC.put("IP",request.getRemoteAddr());
         UserDetailVO userDetailVO = userservice.getUserDetailInfo(id);
         log.info("user detailed info found");
         return Result.success(userDetailVO);
     }
 
-    @GetMapping("/info/simple/{id}")
+    @GetMapping("/info/simple/by-id/{id}")
     @PreAuthorize("hasAnyRole('USER','ADMIN','SUPER_ADMIN')")
-    public Result<UserSimpleVO> getUserSimpleInfo(HttpServletRequest request, @PathVariable String id){
+    public Result<UserSimpleVO> getUserSimpleInfo(HttpServletRequest request, @PathVariable Long id){
         MDC.put("IP",request.getRemoteAddr());
         UserSimpleVO userSimpleVO = userservice.getUserSimpleInfo(id);
         log.info("user simple info found by id");
@@ -92,15 +92,24 @@ public class UserController {
 
     @PutMapping("/info/update/{id}")
     @PreAuthorize("hasAnyRole('USER','ADMIN','SUPER_ADMIN')")
-    public Result<User> updateUserById(HttpServletRequest request, @PathVariable String id,
+    public Result<String> updateUserById(HttpServletRequest request, @PathVariable Long id,
                                        String username,
                                        String email,
                                        Integer gender,
                                        String desc,
                                        String avatar){
         MDC.put("IP",request.getRemoteAddr());
-        User user = userservice.updateUserById(id, username, email, gender, desc, avatar);
+        userservice.updateUserById(id, username, email, gender, desc, avatar);
         log.info("user update info by id");
-        return Result.success(user);
+        return Result.success(null);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAnyRole('USER','ADMIN','SUPER_ADMIN')")
+    public Result<String> deleteUserById(HttpServletRequest request, @PathVariable Long id){
+        MDC.put("IP",request.getRemoteAddr());
+        userservice.deleteUserById(id);
+        log.info("user deleted by id");
+        return Result.success(String.valueOf(id));
     }
 }

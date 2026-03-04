@@ -13,6 +13,7 @@ public interface AuthorizeService extends UserDetailsService {
 
     String login(String loginID, String password);
 
-    void updateUserPwdById(String id, String password, String email, String verificationCode);
+    void updateUserPwdById(Long id, String password, String email, String verificationCode);
 
+    void logout(String token);
 }

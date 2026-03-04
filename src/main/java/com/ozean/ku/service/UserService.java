@@ -14,14 +14,15 @@ public interface UserService {
 
     User getUserAllInfoByEmail(String email);
 
-    User getUserAllInfoById(Integer id);
+    User getUserAllInfoById(Long id);
 
     List<UserSimpleVO> searchUserSimplePage(String name);
 
-    UserDetailVO getUserDetailInfo(String id);
+    UserDetailVO getUserDetailInfo(Long id);
 
-    UserSimpleVO getUserSimpleInfo(String id);
+    UserSimpleVO getUserSimpleInfo(Long id);
 
-    User updateUserById(String id, String username, String email, Integer gender, String desc, String avatar);
+    void updateUserById(Long id, String username, String email, Integer gender, String desc, String avatar);
 
+    void deleteUserById(Long id);
 }

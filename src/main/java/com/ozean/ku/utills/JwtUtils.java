@@ -6,6 +6,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+@Slf4j
 @Component
 public class JwtUtils {
 
@@ -71,7 +73,19 @@ public class JwtUtils {
             Map<String, Claim> claims = jwt.getClaims();
             return blackList.add(jwt.getId());
         } catch (JWTVerificationException e) {
+            log.info("JWT错误：{}", e.getMessage());
             return false;
+        }
+    }
+
+    public String getUsernameFromToken(String token){
+        try{
+            Algorithm algorithm = Algorithm.HMAC256(key);
+            JWTVerifier verifier = JWT.require(algorithm).build();
+            DecodedJWT jwt = verifier.verify(token);
+            return jwt.getClaim("name").asString();
+        } catch (JWTVerificationException e) {
+            throw new JWTVerificationException("JWT解析错误："+e.getMessage());
         }
     }
 }

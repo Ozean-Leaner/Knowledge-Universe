@@ -50,7 +50,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(conf -> conf
-                        .requestMatchers("/auth/**", "/error").permitAll()
+                        .requestMatchers("/auth/sendVerifyCode","/auth/login", "/auth/register","/error").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(conf ->

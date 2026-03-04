@@ -48,9 +48,9 @@ public class AuthorizeController {
     @PostMapping("/login")
     public Result<String> login(HttpServletRequest request, String loginID, String password) {
         MDC.put("IP",request.getRemoteAddr());
-        String token = authorizeService.login(loginID, password);
+        String jwt = authorizeService.login(loginID, password);
         log.info("user login");
-        return Result.success(token);
+        return Result.success(jwt);
     }
 
     @GetMapping("/refresh")
@@ -65,10 +65,20 @@ public class AuthorizeController {
 
     @PutMapping("/user/info/update/pwd/{id}")
     @PreAuthorize("hasAnyRole('USER','ADMIN','SUPER_ADMIN')")
-    public Result<String> updateUserPwdById(HttpServletRequest request, @PathVariable String id, String password, String email, String verificationCode) {
+    public Result<String> updateUserPwdById(HttpServletRequest request, @PathVariable Long id, String password, String email, String verificationCode) {
         MDC.put("IP",request.getRemoteAddr());
         authorizeService.updateUserPwdById(id, password, email, verificationCode);
         log.info("user update pwd by id");
         return Result.success(null);
     }
+
+    @DeleteMapping("/logout")
+    @PreAuthorize("hasAnyRole('USER','ADMIN','SUPER_ADMIN')")
+    public Result<String> logout(HttpServletRequest request, @RequestHeader("Authorization") String token) {
+        MDC.put("IP",request.getRemoteAddr());
+        authorizeService.logout(token.substring(7).trim());
+        log.info("user logout");
+        return  Result.success(null);
+    }
+
 }

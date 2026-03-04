@@ -7,6 +7,7 @@ import com.ozean.ku.service.AuthorizeService;
 import com.ozean.ku.service.RedisService;
 import com.ozean.ku.utills.JwtUtils;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.exceptions.TooManyResultsException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
@@ -27,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 @Service
+@Slf4j
 public class AuthorizeServiceImpl implements AuthorizeService {
 
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
@@ -53,6 +55,8 @@ public class AuthorizeServiceImpl implements AuthorizeService {
 
     private static final String VERIFY_CODE_KEY_PREFIX = "verify_code:email:";
     private static final long VERIFY_CODE_EXPIRE_MINUTES = 30;
+    private static final String TOKEN_PREFIX = "jwt:id:";
+    private static final long TOKEN_EXPIRE_DAYS = 7;
 
     private boolean isEmail(String loginID){
         return EMAIL_PATTERN.matcher(loginID).matches();
@@ -73,10 +77,6 @@ public class AuthorizeServiceImpl implements AuthorizeService {
 
     @Override
     public void sendVerifyCode(String email) {
-
-        if (userMapper.getUserAllInfoByEmail(email) != null){
-            throw new AuthorizeException("该邮箱已被注册！");
-        }
 
         String code = String.format("%06d", new SecureRandom().nextInt(1000000));
 
@@ -117,10 +117,13 @@ public class AuthorizeServiceImpl implements AuthorizeService {
             AuthenticationManager authenticationManager = applicationContext.getBean(AuthenticationManager.class);
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginID, password));
             UserDetails userDetails = Objects.requireNonNull((UserDetails) authentication.getPrincipal(), "请输入用户名或密码！");
-            userMapper.updateUserLoginTime(String.valueOf(user.getUser_id()));
-            return jwtUtils.createJwt(userDetails);
+            String key = TOKEN_PREFIX + user.getUsername();
+            userMapper.updateUserLoginTime(user.getUserId());
+            String jwt = jwtUtils.createJwt(userDetails);
+            redisService.set(key, jwt, TOKEN_EXPIRE_DAYS, TimeUnit.DAYS);
+            return jwt;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("登录错误：{}", e.getMessage());
             if (e instanceof AuthenticationException) {
                 throw new AuthorizeException("用户名或密码错误！");
             } else if (e.getCause() instanceof TooManyResultsException) {
@@ -131,11 +134,19 @@ public class AuthorizeServiceImpl implements AuthorizeService {
     }
 
     @Override
-    public void updateUserPwdById(String id, String password, String email, String verificationCode) {
-        sendVerifyCode(email);
+    public void updateUserPwdById(Long id, String password, String email, String verificationCode) {
+//        sendVerifyCode(email);
         if (verifyCode(email, verificationCode)) {
             userMapper.updateUserPwdById(id, passwordEncoder.encode(password));
         }
+    }
+
+    @Override
+    public void logout(String token) {
+        String key = TOKEN_PREFIX + jwtUtils.getUsernameFromToken(token);
+        String jwt = redisService.get(key).toString();
+        jwtUtils.invalidate(jwt);
+        redisService.delete(key);
     }
 
     private boolean verifyCode(String email, String verificationCode) {
